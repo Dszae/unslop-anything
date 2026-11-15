@@ -191,3 +191,17 @@ test("the corpus keeps complete rounds and Google Play's first pass", async () =
   assert.strictEqual(playFirstPass([...first, ...topUp]).length, 2400);
   assert.deepStrictEqual(playFirstPass([{ id: "a", country: "gb" }, { id: "b", country: "my" }]).map((r) => r.id), ["a"]);
 });
+
+test("collection rotates through categories within each round", async () => {
+  const { collectionOrder } = await import("../lib/collect.mjs");
+  const apps = [
+    { id: "a1", category: "a" }, { id: "a2", category: "a" }, { id: "a3", category: "a" },
+    { id: "b1", category: "b" }, { id: "c1", category: "c", round: 2 }, { id: "b2", category: "b" },
+  ];
+  assert.deepStrictEqual(collectionOrder(apps).map((a) => a.id), ["a1", "b1", "a2", "b2", "a3", "c1"]);
+});
+
+test("rank bands include the deep band past 100", async () => {
+  const { bandOf } = await import("../1-apps.mjs");
+  assert.deepStrictEqual([1, 10, 11, 50, 51, 100, 101, 200].map(bandOf), ["head", "head", "middle", "middle", "tail", "tail", "deep", "deep"]);
+});
