@@ -1,8 +1,25 @@
-# unslopovich
+<p align="center">
+  <img src="docs/logo.svg" width="160" height="160" alt="A phone with a stethoscope listening to it">
+</p>
 
-**Your app looks AI-generated. Dr. Unslopovich noticed.**
+<h1 align="center">unslopovich</h1>
 
-Users don't hate your purple gradient. They hate what you did to the back button.
+<p align="center"><em>Your app looks AI-generated. Dr. Unslopovich noticed.</em></p>
+
+<p align="center"><em>Users don't hate your purple gradient. They hate what you did to the back button.</em></p>
+
+<p align="center">
+  <a href="https://www.npmjs.com/package/unslopovich"><img src="https://img.shields.io/npm/v/unslopovich?color=E2862A&label=npm" alt="npm version"></a>
+  <a href="#install"><img src="https://img.shields.io/badge/works%20with-6%20agents-E2862A" alt="Works with 6 agents"></a>
+  <a href="https://github.com/erkamyaman/unslopovich/actions/workflows/test.yml"><img src="https://img.shields.io/github/actions/workflow/status/erkamyaman/unslopovich/test.yml?branch=main&label=tests" alt="Tests"></a>
+  <img src="https://img.shields.io/badge/deps-0-brightgreen" alt="No dependencies">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-E2862A" alt="MIT license"></a>
+  <a href="https://github.com/erkamyaman/unslopovich"><img src="https://img.shields.io/github/stars/erkamyaman/unslopovich?style=social" alt="GitHub stars"></a>
+</p>
+
+<p align="center">1,201,466 app reviews read · 0 purple gradients found · 31 detector rules · one command</p>
+
+<p align="center"><a href="research/README.md">The study behind it</a>: what people actually complain about, with the method and the code.</p>
 
 ![Before: a purple gradient dashboard with sparkles, an AI promo, invented stats, and an ad in the middle of the screen. After: the same app as a native Android zone list with search, swipe actions for purge cache and DNS, a pending zone labeled in words, and one Add site button](docs/before-after.png)
 
@@ -18,26 +35,36 @@ Then tell your agent:
 /unslopovich review my app
 ```
 
-Mobile apps, web apps, and websites. Same doctor, different reflexes: on a phone it checks you didn't build a website, and on the web it checks you didn't break one.
+Works in Claude Code, Codex, Cursor, OpenCode, Gemini CLI, and GitHub Copilot ([install options](#install)). Mobile apps, web apps, and websites. Same doctor, different reflexes: on a phone it checks you didn't build a website, and on the web it checks you didn't break one.
 
 ## The doctor did the reading
 
-Dr. Unslopovich scanned 105,027 App Store reviews from 299 top apps. Exactly one mentioned a purple gradient. It was asking for one.
+Dr. Unslopovich read 1,201,466 reviews of 1,162 apps on the App Store and Google Play. Not one mentioned a purple gradient. "Gradient" came up 58 times, mostly from people asking for one.
 
-Here's what made people furious instead, in the 46,742 reviews rated 3 stars or lower:
+Here's what the 529,434 reviews rated 3 stars or lower complained about instead:
 
-- **You made it slow.** 4,326 reviews about lag, glitches, and crashes.
-- **You moved the button.** 1,751. Telegram's Contacts tab. Chrome's back arrow. Instagram's hold to pause.
-- **You interrupted them.** 1,148. Popups in the middle of ordering food.
-- **You hid everything.** 859 said it was hard to find or use.
-- **You put AI where the feature was.** 705. Gemini in the toolbar. Alexa in the search box.
-- **You never tried it on their phone.** 345 about broken layouts.
+| | App Store | Google Play |
+|---|---|---|
+| **It's broken.** Something just doesn't work | 29% | 36% |
+| **The business behind it.** Late deliveries, unfair games, bad drivers | 24% | 20% |
+| **Nobody helps.** Support, refunds, scams | 22% | 18% |
+| **It costs too much.** Paywalls, subscriptions, surprise charges | 20% | 14% |
+| **Can't get in.** Login, verification codes, locked accounts | 11% | 10% |
+| **You interrupted them.** Ads and popups mid-task | 10% | 13% |
+| **You moved the button.** A redesign moved or removed something | 9% | 6% |
+| **You hid everything.** Hard to find or use | 6% | 7% |
+| **You made it slow.** Lag, freezing, battery | 5% | 7% |
+| **It crashed.** | 5% | 4% |
+| **You never tried it on their phone.** Broken layouts | 2% | 2% |
+| **You put AI where the feature was.** | 2% | 1% |
 
-<sub>Most recent reviews from the US and UK App Stores. Keyword matches, so treat them as rough. Themes can overlap.</sub>
+About a quarter of complaints (24% on the App Store, 25% on Google Play) are things a design and front-end pass can fix. Crashes, lag, and bugs together are 35% and 43%.
+
+<sub>A random sample of 1,200 low-rated reviews, each read and labelled against written definitions; a review can name several problems. Rounded; 95% intervals are about ±3 to 4 points for the big themes. [The whole method, code, and limits.](research/README.md)</sub>
 
 So the doctor checks what users actually scream about first, and your gradient second.
 
-The biggest bucket is the one no design review can see: you can't read lag off a screenshot. The doctor flags what code gives away, like lists that render every row up front, and every report says **Not profiled** until someone actually profiles it. A clean review is not a clean bill of health.
+The biggest bucket is the one no design review can see: you can't read a bug or lag off a screenshot. The doctor flags what code gives away, like lists that render every row up front, and every report says **Not profiled** until someone actually profiles it. A clean review is not a clean bill of health.
 
 ## Symptoms
 
@@ -117,13 +144,33 @@ Only want the bad news? Ask for a review and it stops at the diagnosis.
 
 The doctor trained under good people. [Impeccable](https://github.com/pbakaus/impeccable) by Paul Bakaus showed that a deterministic detector and design vocabulary beat a longer prompt. [Hallmark](https://github.com/Nutlope/hallmark) by Together AI showed the value of a floor that never bends, defaults you can only waive on the record, and a fresh-eyed reviewer at the end. [Unslop](https://github.com/heydamir/unslop) by Damir Sokolovsky ([@heydamir](https://x.com/heydamir)) showed that deciding how much to change comes before changing anything, and that richness belongs in the content, not the chrome. Unslopovich is for the screens they leave to others: native mobile apps, and the parts of a web app people use every day.
 
-## Other agents
-
-Installs for Claude Code by default. The skill is `SKILL.md` plus a `reference/` folder it reads on demand and the detector in `scripts/`. For any other agent that reads `SKILL.md`, point it at that agent's skills folder:
+## Install
 
 ```bash
-npx unslopovich --dir ~/path/to/skills
+npx unslopovich
 ```
+
+The installer finds the coding agents on your machine and installs for each one. Needs Node 18 or later.
+
+| Agent | Installed to | Then type |
+|---|---|---|
+| Claude Code | `~/.claude/skills/unslopovich` | `/unslopovich review my app` |
+| Codex | `~/.agents/skills/unslopovich` | `$unslopovich review my app` |
+| Cursor | `~/.agents/skills/unslopovich` (Cursor reads it there) | `/unslopovich review my app` |
+| OpenCode | `~/.agents/skills/unslopovich` (OpenCode reads it there) | `/unslopovich review my app` |
+| Gemini CLI | `.gemini/skills/unslopovich`, per project | `/unslopovich review my app` |
+| GitHub Copilot | `.github/skills/unslopovich`, per project | `/unslopovich review my app` |
+
+Or just ask in your own words ("review my app for AI slop") and the agent picks the skill up.
+
+- **Some agents only:** `npx unslopovich --agent codex,cursor` (any of `claude`, `codex`, `cursor`, `opencode`, `gemini`, `copilot`)
+- **One project, for the whole team:** run `npx unslopovich --project` in the project and commit the folder it creates
+- **Any other agent that reads `SKILL.md`:** `npx unslopovich --dir path/to/its/skills`
+- **As a Claude Code plugin:** `/plugin marketplace add erkamyaman/unslopovich`, then `/plugin install unslopovich@unslopovich`
+- **With the open skills installer:** `npx skills add erkamyaman/unslopovich`
+- **By hand:** copy `skills/unslopovich` from this repo into your agent's skills folder
+
+The skill is `SKILL.md`, a `reference/` folder it reads on demand, and the detector in `scripts/`. Run `npx unslopovich` again to update.
 
 ## License
 
