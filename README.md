@@ -179,10 +179,28 @@ Or just ask in your own words ("review my app for AI slop") and the agent picks 
 - **One project, for the whole team:** run `npx unslopovich --project` in the project and commit the folder it creates
 - **Any other agent that reads `SKILL.md`:** `npx unslopovich --dir path/to/its/skills`
 - **As a Claude Code plugin:** `/plugin marketplace add erkamyaman/unslopovich`, then `/plugin install unslopovich@unslopovich`
+- **As a Codex plugin:** `codex plugin marketplace add erkamyaman/unslopovich`, then `codex plugin add unslopovich@unslopovich`
 - **With the open skills installer:** `npx skills add erkamyaman/unslopovich`
 - **By hand:** copy `skills/unslopovich` from this repo into your agent's skills folder
 
-The skill is `SKILL.md`, a `reference/` folder it reads on demand, and the detector in `scripts/`. Run `npx unslopovich` again to update.
+The skill is `SKILL.md`, a `reference/` folder it reads on demand, and the detector in `scripts/`.
+
+## Update or remove
+
+Run `npx unslopovich` again to update. As a plugin, `/plugin marketplace update unslopovich` in Claude Code or `codex plugin marketplace upgrade` in Codex.
+
+To remove it, delete the `unslopovich` folder from your agent's skills folder (the table above says where), or `/plugin uninstall unslopovich@unslopovich` and `codex plugin remove unslopovich@unslopovich`. It leaves only `.unslopovich/` in your project, if you made a chart.
+
+## What it won't do
+
+- **It can't see your app run.** The detector reads code. The skill looks at screens when your agent can open them, and says so when it couldn't.
+- **It can't profile.** Lag and battery need a real device and a profiler. Reports say **Not profiled**.
+- **It won't fix your bugs.** The biggest complaint in the study is "it's broken". That's your test suite's job.
+- **Taste is still taste.** The rules come from reviews and platform guidelines, but the final call on how your app looks is yours. Write it in the chart.
+
+If something it flags is wrong, [open an issue](https://github.com/erkamyaman/unslopovich/issues) with the line. False positives get fixed first.
+
+Want to hear when a new version is out? Star the repo, then **Watch → Custom → Releases**.
 
 ## License
 
