@@ -17,7 +17,7 @@
 
 import path from "node:path";
 import fs from "node:fs";
-import { SEED, MAX_STARS, MIN_WORDS, WINDOW_MONTHS, GOLD_PER_PLATFORM } from "./config.mjs";
+import { SEED, LOW_STARS, MIN_WORDS, WINDOW_MONTHS, GOLD_PER_PLATFORM, GOLD_FOUR_STAR_PER_PLATFORM } from "./config.mjs";
 import { THEME_IDS, DESIGN_THEMES } from "./lib/taxonomy.mjs";
 import { DATA, RESULTS, dataPath, readJson, readJsonlGz, listFiles, writeJson, rng, log } from "./lib/util.mjs";
 import { corpusApps } from "./lib/corpus.mjs";
@@ -133,6 +133,8 @@ function corpusStats() {
       appsWithReviews: per.filter((a) => a.corpus > 0).length,
       corpus: per.reduce((s, a) => s + a.corpus, 0),
       lowRated: per.reduce((s, a) => s + a.lowRated, 0),
+      fourStar: per.reduce((s, a) => s + (a.fourStar || 0), 0),
+      fourStarPopulation: per.reduce((s, a) => s + (a.fourStarPopulation || 0), 0),
       population: per.reduce((s, a) => s + a.population, 0),
       countries: [...new Set(metas.flatMap((m) => m.passes.filter((p) => p.added).map((p) => p.country)))].length,
       medianDaysCovered: spans.length ? Math.round(spans[Math.floor(spans.length / 2)]) : null,
@@ -156,18 +158,25 @@ function readGold() {
 
 async function main() {
   const random = rng(SEED ^ 0xb007);
-  const rules = readJsonlGz(dataPath("rules.jsonl.gz")).filter((r) => r.english);
+  const allRules = readJsonlGz(dataPath("rules.jsonl.gz")).filter((r) => r.english);
+  const rules = allRules.filter((r) => r.stars <= LOW_STARS);
   const ruleById = new Map(rules.map((r) => [r.id, r]));
-  const { sample: goldSample, labels: goldLabels } = readGold();
+  const { sample: goldSample, labels: allGoldLabels } = readGold();
+  // The low-rated reference sample drives the headline estimates; the 4-star
+  // one is reported on its own below.
+  const isFour = (key) => goldSample.get(key).set === "four";
+  const goldLabels = new Map([...allGoldLabels].filter(([k]) => !isFour(k)));
+  const fourLabels = [...allGoldLabels].filter(([k]) => isFour(k)).map(([, l]) => l);
 
   const result = {
     generatedAt: new Date().toISOString(),
-    method: { maxStars: MAX_STARS, minWords: MIN_WORDS, windowMonths: WINDOW_MONTHS, referencePerStore: GOLD_PER_PLATFORM, bootstrap: B, minAppReviews: MIN_APP_REVIEWS },
+    method: { maxStars: LOW_STARS, fourStarReferencePerStore: GOLD_FOUR_STAR_PER_PLATFORM, minWords: MIN_WORDS, windowMonths: WINDOW_MONTHS, referencePerStore: GOLD_PER_PLATFORM, bootstrap: B, minAppReviews: MIN_APP_REVIEWS },
     corpus: corpusStats(),
     platforms: {},
     byCategory: {},
     byBand: {},
     byStars: {},
+    fourStar: {},
   };
 
   const allApps = appCounts(rules);
@@ -232,16 +241,33 @@ async function main() {
       for (const key of KEYS) target[v][key] = correctedApp(subset, key);
     }
   }
-  for (const stars of [1, 2, 3]) {
-    const subset = appCounts(rules.filter((r) => r.stars === stars));
+  for (const stars of [1, 2, 3, 4]) {
+    const subset = appCounts(allRules.filter((r) => r.stars === stars));
     result.byStars[stars] = { reviews: subset.reduce((s, a) => s + a.n, 0) };
     for (const key of KEYS) result.byStars[stars][key] = reviewShare(subset, key);
+  }
+
+  // 4 stars next to 3 stars or fewer, both from reference labels.
+  for (const platform of PLATFORMS) {
+    const four = fourLabels.filter((l) => l.english && goldSample.get(l.key).platform === platform);
+    const low = [...goldLabels.values()].filter((l) => l.english && goldSample.get(l.key).platform === platform);
+    const share = (ls, key) => {
+      const k = ls.filter((l) => has(l.themes, key)).length;
+      return { share: ls.length ? k / ls.length : NaN, ci: wilson(k, ls.length), positives: k };
+    };
+    result.fourStar[platform] = {
+      labelled: fourLabels.filter((l) => goldSample.get(l.key).platform === platform).length,
+      english: four.length,
+      complaintShare: four.length ? four.filter((l) => l.complaint).length / four.length : NaN,
+      lowComplaintShare: low.length ? low.filter((l) => l.complaint).length / low.length : NaN,
+      estimates: Object.fromEntries(KEYS.map((key) => [key, { four: share(four, key), low: share(low, key) }])),
+    };
   }
 
   fs.mkdirSync(RESULTS, { recursive: true });
   writeJson(path.join(RESULTS, "summary.json"), result);
   fs.writeFileSync(path.join(RESULTS, "summary.md"), markdown(result));
-  log(`wrote results/summary.json and results/summary.md (${rules.length} English reviews by rules, ${goldLabels.size} reference labels)`);
+  log(`wrote results/summary.json and results/summary.md (${allRules.length} English reviews by rules, ${allGoldLabels.size} reference labels)`);
 }
 
 const pct = (x) => (Number.isFinite(x) ? `${(100 * x).toFixed(1)}%` : "n/a");
@@ -261,6 +287,8 @@ function markdown(r) {
   row("Reviews in the corpus", (p) => num(p.corpus));
   row(`Rated ${r.method.maxStars} stars or lower`, (p) => num(p.lowRated));
   row(`Of those, ${r.method.minWords}+ words and not duplicated`, (p) => num(p.population));
+  row("Rated 4 stars", (p) => num(p.fourStar));
+  row("Of those, 4+ words and not duplicated", (p) => num(p.fourStarPopulation));
   row("Median days covered per app", (p) => num(p.medianDaysCovered));
   L.push("", `Total: ${num(c.totals.corpus)} reviews.`, "");
 
@@ -294,6 +322,20 @@ function markdown(r) {
   table("By category (corrected app share, both stores)", r.byCategory, "Category");
   table("By chart rank band (corrected app share, both stores)", r.byBand, "Band");
   table("By star rating (rule review share, uncorrected)", r.byStars, "Stars");
+
+  L.push("## 4 stars next to 3 stars or fewer", "", "Reference labels only. Share of English reviews in each sample that state the theme. The 4-star share counts every 4-star review, with or without a complaint.", "");
+  for (const platform of PLATFORMS) {
+    const f = r.fourStar[platform];
+    if (!f) continue;
+    L.push(`### ${STORE[platform]}`, "", `4-star sample: ${f.labelled} reviews, ${f.english} in English, ${pct(f.complaintShare)} of them complaints (3 stars or fewer: ${pct(f.lowComplaintShare)}).`, "");
+    L.push("| Theme | 4 stars | 95% interval | 3 stars or fewer | 95% interval |", "|---|---|---|---|---|");
+    const keys = KEYS.slice().sort((a, b) => (f.estimates[b].four.share || 0) - (f.estimates[a].four.share || 0));
+    for (const k of keys) {
+      const e = f.estimates[k];
+      L.push(`| ${k} | ${pct(e.four.share)} | ${range(e.four.ci)} | ${pct(e.low.share)} | ${range(e.low.ci)} |`);
+    }
+    L.push("");
+  }
   return L.join("\n") + "\n";
 }
 
