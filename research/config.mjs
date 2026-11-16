@@ -60,15 +60,18 @@ export const CAP_PER_PASS = 150;
 export const CONCURRENCY = 3;
 export const REQUEST_DELAY_MS = 350;
 
-// The corpus: the collection rounds that finished (see lib/corpus.mjs).
-// App Store: rounds 1 and 2 (701 apps); rounds 3 and 4 were stopped part way.
-// Google Play: each app's first full pass; its top-up was stopped part way.
-export const CORPUS = { appleRounds: [1, 2], playFirstPass: { storefronts: 10, capPerApp: 2400 } };
+// The corpus: every app whose collection finished (see lib/corpus.mjs).
+// Each store was collected until it reached its target, then stopped.
+export const CORPUS = { stopAt: { apple: 2000000, play: 3000000 } };
 
 // Only reviews from the last WINDOW_MONTHS before collection are kept, so an
 // old most-helpful review about a long-gone design does not take a slot.
-// Analysis population: reviews of 3 stars or fewer, with at least 4 words.
-export const MAX_STARS = 3;
+// Analysis population: reviews of 4 stars or fewer, with at least 4 words.
+// The headline numbers are about low-rated reviews (3 stars or fewer); 4-star
+// reviews are reported on their own, to show what still bothers people who
+// mostly like an app.
+export const MAX_STARS = 4;
+export const LOW_STARS = 3;
 export const WINDOW_MONTHS = 24;
 export const MIN_WORDS = 4;
 
@@ -78,6 +81,8 @@ export const SAMPLE_PER_APP = 30;
 // Reference sample for hand labelling, per store, and the size of each
 // labelling batch.
 export const GOLD_PER_PLATFORM = 600;
+// A second reference sample, of 4-star reviews only, per store.
+export const GOLD_FOUR_STAR_PER_PLATFORM = 150;
 export const GOLD_BATCH = 100;
 
 // Optional: classify the per-app sample with Claude through the Batch API

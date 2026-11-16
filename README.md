@@ -17,7 +17,7 @@
   <a href="https://github.com/erkamyaman/unslopovich"><img src="https://img.shields.io/github/stars/erkamyaman/unslopovich?style=social" alt="GitHub stars"></a>
 </p>
 
-<p align="center">1,201,466 app reviews read · 0 purple gradients found · 31 detector rules · one command</p>
+<p align="center">5,008,684 app reviews read · 1 purple gradient found · 31 detector rules · one command</p>
 
 <p align="center"><a href="research/README.md">The study behind it</a>: what people actually complain about, with the method and the code.</p>
 
@@ -37,30 +37,67 @@ Then tell your agent:
 
 Works in Claude Code, Codex, Cursor, OpenCode, Gemini CLI, and GitHub Copilot ([install options](#install)). Mobile apps, web apps, and websites. Same doctor, different reflexes: on a phone it checks you didn't build a website, and on the web it checks you didn't break one.
 
+## A real run
+
+We ran it on [QuizHub](https://github.com/ramkrishnajha5/QuizHub), an open-source quiz app, and changed nothing by hand:
+
+![QuizHub's quiz setup screen on a phone. Before: two gradient banners, sparkle icons, emoji folder tiles, a quiz summary box and a gradient Start button. After: a plain "Start a quiz" title, folders and tests as list rows, labeled Topic and Length, and a button that says "Start 15-question quiz"](docs/examples/quizhub.png)
+
+Score 10 to 18 out of 24. Detector findings on this screen 39 to 0. It also found that when the topic list fails to load, the screen showed an empty dropdown and a dead button and said nothing. Now it says so and offers Try again. [The report and the diff.](docs/examples/quizhub/)
+
+<sub>The sandbox blocked the app's database, so both sides show the same sample data.</sub>
+
+## Same doctor, three patients
+
+The purple gradient above is the easy case. The harder one is the calm default today's models reach for: white cards, gray borders, one blue accent, a stat row, an AI banner. It looks fine, and it looks like every other app. The doctor treats that too, and the result should look like *your* app, whatever your style is.
+
+![A plant care app. Before: a white card layout with an AI insights banner, three stat tiles, emoji plant icons, and colored status dots. After: a deep green Fernly screen that leads with "3 plants are thirsty today" and a Water button for each one](docs/examples/plant.png)
+
+![A freight dispatch dashboard. Before: a welcome message, four KPI tiles, a gradient chart, an AI insights card, and two recent shipments. After: a dense Dockline board with late loads first, the reason each one is late, and who to call](docs/examples/dash.png)
+
+![A bakery website. Before: a centered hero with gradient text, an eyebrow label, "trusted by 10,000+", and three feature cards. After: a cobalt Nine Loaves page with today's bake, what has sold out, and a box to reserve a Saturday loaf](docs/examples/bakery.png)
+
+<sub>Illustrations of what a treatment aims for, drawn by hand from the skill's rules. The apps are made up.</sub>
+
 ## The doctor did the reading
 
-Dr. Unslopovich read 1,201,466 reviews of 1,162 apps on the App Store and Google Play. Not one mentioned a purple gradient. "Gradient" came up 58 times, mostly from people asking for one.
+Dr. Unslopovich read 5,008,684 reviews of 7,786 apps on the App Store and Google Play. "Gradient" came up 163 times, mostly from people asking for one. "Purple gradient" came up once, in a 2-star review asking Copilot to bring its blue and purple gradients back.
 
-Here's what the 529,434 reviews rated 3 stars or lower complained about instead:
+Here's what the 2,072,794 reviews rated 3 stars or lower complained about instead:
 
 | | App Store | Google Play |
 |---|---|---|
-| **It's broken.** Something just doesn't work | 29% | 36% |
-| **The business behind it.** Late deliveries, unfair games, bad drivers | 24% | 20% |
-| **Nobody helps.** Support, refunds, scams | 22% | 18% |
-| **It costs too much.** Paywalls, subscriptions, surprise charges | 20% | 14% |
-| **Can't get in.** Login, verification codes, locked accounts | 11% | 10% |
-| **You interrupted them.** Ads and popups mid-task | 10% | 13% |
-| **You moved the button.** A redesign moved or removed something | 9% | 6% |
-| **You hid everything.** Hard to find or use | 6% | 7% |
-| **You made it slow.** Lag, freezing, battery | 5% | 7% |
+| **It's broken.** Something just doesn't work | 35% | 35% |
+| **Nobody helps.** Support, refunds, scams | 22% | 20% |
+| **The business behind it.** Late deliveries, unfair games, bad drivers | 18% | 21% |
+| **It costs too much.** Paywalls, subscriptions, surprise charges | 20% | 18% |
+| **Can't get in.** Login, verification codes, locked accounts | 11% | 11% |
+| **You interrupted them.** Ads and popups mid-task | 9% | 12% |
+| **You hid everything.** Hard to find or use | 9% | 7% |
+| **You moved the button.** A redesign moved or removed something | 7% | 5% |
+| **You made it slow.** Lag, freezing, battery | 5% | 6% |
 | **It crashed.** | 5% | 4% |
-| **You never tried it on their phone.** Broken layouts | 2% | 2% |
 | **You put AI where the feature was.** | 2% | 1% |
+| **You never tried it on their phone.** Broken layouts | 1% | 1% |
 
-About a quarter of complaints (24% on the App Store, 25% on Google Play) are things a design and front-end pass can fix. Crashes, lag, and bugs together are 35% and 43%.
+About a quarter of complaints (26% on the App Store, 24% on Google Play) are things a design and front-end pass can fix. Crashes, lag, and bugs together are 41% on both.
 
 <sub>A random sample of 1,200 low-rated reviews, each read and labelled against written definitions; a review can name several problems. Rounded; 95% intervals are about ±3 to 4 points for the big themes. [The whole method, code, and limits.](research/README.md)</sub>
+
+And the 4-star reviews, from people who mostly like the app? 87% of them on the App Store and 61% on Google Play still name a problem. It's a different list:
+
+| | App Store | Google Play |
+|---|---|---|
+| **Add this.** A feature they want | 30% | 12% |
+| **It's broken.** | 25% | 18% |
+| **The business behind it.** | 15% | 15% |
+| **It costs too much.** | 12% | 7% |
+| **You hid everything.** | 11% | 5% |
+| **Nobody helps.** | 2% | 1% |
+
+Support and account trouble mostly drop out. What's left is "add this" and "this is broken". A design pass would fix 20% (App Store) and 12% (Google Play) of them.
+
+<sub>A second random sample of 300 4-star reviews, 150 per store, labelled the same way. Smaller, so intervals are about ±5 to 7 points.</sub>
 
 So the doctor checks what users actually scream about first, and your gradient second.
 
@@ -167,10 +204,28 @@ Or just ask in your own words ("review my app for AI slop") and the agent picks 
 - **One project, for the whole team:** run `npx unslopovich --project` in the project and commit the folder it creates
 - **Any other agent that reads `SKILL.md`:** `npx unslopovich --dir path/to/its/skills`
 - **As a Claude Code plugin:** `/plugin marketplace add erkamyaman/unslopovich`, then `/plugin install unslopovich@unslopovich`
+- **As a Codex plugin:** `codex plugin marketplace add erkamyaman/unslopovich`, then `codex plugin add unslopovich@unslopovich`
 - **With the open skills installer:** `npx skills add erkamyaman/unslopovich`
 - **By hand:** copy `skills/unslopovich` from this repo into your agent's skills folder
 
-The skill is `SKILL.md`, a `reference/` folder it reads on demand, and the detector in `scripts/`. Run `npx unslopovich` again to update.
+The skill is `SKILL.md`, a `reference/` folder it reads on demand, and the detector in `scripts/`.
+
+## Update or remove
+
+Run `npx unslopovich` again to update. As a plugin, `/plugin marketplace update unslopovich` in Claude Code or `codex plugin marketplace upgrade` in Codex.
+
+To remove it, delete the `unslopovich` folder from your agent's skills folder (the table above says where), or `/plugin uninstall unslopovich@unslopovich` and `codex plugin remove unslopovich@unslopovich`. It leaves only `.unslopovich/` in your project, if you made a chart.
+
+## What it won't do
+
+- **It can't see your app run.** The detector reads code. The skill looks at screens when your agent can open them, and says so when it couldn't.
+- **It can't profile.** Lag and battery need a real device and a profiler. Reports say **Not profiled**.
+- **It won't fix your bugs.** The biggest complaint in the study is "it's broken". That's your test suite's job.
+- **Taste is still taste.** The rules come from reviews and platform guidelines, but the final call on how your app looks is yours. Write it in the chart.
+
+If something it flags is wrong, [open an issue](https://github.com/erkamyaman/unslopovich/issues) with the line. False positives get fixed first.
+
+Want to hear when a new version is out? Star the repo, then **Watch → Custom → Releases**.
 
 ## License
 

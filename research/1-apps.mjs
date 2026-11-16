@@ -7,9 +7,9 @@ import { CATEGORIES, APPS_PER_CATEGORY, RANK_BANDS, CHART_COUNTRY, SEED } from "
 import { dataPath, getJson, rng, shuffle, hash, writeJson, readJson, log, sleep, args } from "./lib/util.mjs";
 
 // chart: "free" or "paid".
-async function appleChart(genre, chart = "free") {
+async function appleChart(genre, chart = "free", country = CHART_COUNTRY) {
   const list = chart === "paid" ? "toppaidapplications" : "topfreeapplications";
-  const url = `https://itunes.apple.com/${CHART_COUNTRY}/rss/${list}/limit=200/genre=${genre}/json`;
+  const url = `https://itunes.apple.com/${country}/rss/${list}/limit=200/genre=${genre}/json`;
   const feed = await getJson(url);
   return (feed?.feed?.entry || []).map((e, i) => ({
     id: e.id.attributes["im:id"],
@@ -47,36 +47,50 @@ export function drawFromChart(chart, quota, random, taken = () => false) {
 
 // Add apps to one store without touching the ones already chosen: a second
 // draw from the same charts and rank bands, skipping every app already in.
-// Usage: node 1-apps.mjs --add apple --per-category 18 [--chart paid]
-async function extend(platform, perCategory, chart = "free") {
+export function bandOf(rank) {
+  return rank <= 10 ? "head" : rank <= 50 ? "middle" : rank <= 100 ? "tail" : "deep";
+}
+
+// Usage:
+//   node 1-apps.mjs --add apple --per-category 18 [--chart paid]
+//   node 1-apps.mjs --add play --all                    every chart app not yet in
+//   node 1-apps.mjs --add apple --all --chart-country gb  the same, from another storefront's chart
+async function extend(platform, perCategory, chart = "free", { all = false, chartCountry = CHART_COUNTRY } = {}) {
   const file = dataPath("apps.json");
   const current = readJson(file);
   const seen = new Set(current.apps.map((a) => `${a.platform}:${a.id}`));
-  const round = Math.max(1, ...current.apps.map((a) => a.round || 1)) + 1;
+  // Rounds are numbered per store, past any round drawn and later dropped.
+  const used = [
+    ...current.apps.filter((a) => a.platform === platform).map((a) => a.round || 1),
+    ...(current.rounds || []).filter((r) => r.platform === platform).map((r) => r.round),
+  ];
+  const round = Math.max(1, ...used) + 1;
   let added = 0;
   for (const [category, stores] of Object.entries(CATEGORIES)) {
     const storeCats = stores[platform];
     const quota = Math.round(perCategory / storeCats.length);
     for (const storeCat of storeCats) {
-      const list = platform === "apple" ? await appleChart(storeCat, chart) : await playChart(storeCat);
+      const list = platform === "apple" ? await appleChart(storeCat, chart, chartCountry) : await playChart(storeCat);
       const random = rng(SEED ^ hash(`${platform}:${storeCat}:round${round}`));
-      const picked = drawFromChart(list, quota, random, (a) => seen.has(`${platform}:${a.id}`));
+      const picked = all
+        ? shuffle(list.filter((a) => !seen.has(`${platform}:${a.id}`)), random).map((a) => ({ ...a, band: bandOf(a.rank) }))
+        : drawFromChart(list, quota, random, (a) => seen.has(`${platform}:${a.id}`));
       for (const app of picked) {
         seen.add(`${platform}:${app.id}`);
-        current.apps.push({ platform, category, storeCategory: String(storeCat), chartSize: list.length, round, chart, ...app });
+        current.apps.push({ platform, category, storeCategory: String(storeCat), chartSize: list.length, round, chart, chartCountry, ...app });
       }
       added += picked.length;
       log(`${platform} ${category}/${storeCat}: took ${picked.length} more`);
     }
   }
-  current.rounds = [...(current.rounds || []), { round, platform, perCategory, chart, at: new Date().toISOString() }];
+  current.rounds = [...(current.rounds || []), { round, platform, perCategory: all ? "all" : perCategory, chart, chartCountry, at: new Date().toISOString() }];
   writeJson(file, current);
   log(`added ${added} ${platform} apps in round ${round}`);
 }
 
 async function main() {
   const opts = args();
-  if (opts.add) return extend(opts.add, Number(opts["per-category"]), opts.chart || "free");
+  if (opts.add) return extend(opts.add, Number(opts["per-category"]), opts.chart || "free", { all: !!opts.all, chartCountry: opts["chart-country"] || CHART_COUNTRY });
   const apps = [];
   const seen = new Set();
   for (const [category, stores] of Object.entries(CATEGORIES)) {

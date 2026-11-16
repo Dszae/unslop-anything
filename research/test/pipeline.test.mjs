@@ -82,15 +82,16 @@ test("Play reviews parse without the reviewer's name", () => {
   assert.ok(!JSON.stringify(review).includes("someone"));
 });
 
-test("the population keeps low-rated, long enough, unique reviews", () => {
+test("the population keeps reviews of 4 stars or fewer, long enough, unique", () => {
   const rows = [
     { rating: 1, title: "", text: "It crashes every single time" },
     { rating: 1, title: "", text: "It crashes every single time!" },
     { rating: 2, title: "Bad", text: "too short" },
     { rating: 5, title: "", text: "I love this app so much" },
     { rating: 3, title: "", text: "Fine but the new layout hides search" },
+    { rating: 4, title: "", text: "Good app but the ads are loud" },
   ];
-  assert.deepStrictEqual(population(rows).map((r) => r.rating), [1, 3]);
+  assert.deepStrictEqual(population(rows).map((r) => r.rating), [1, 3, 4]);
   assert.strictEqual(words("it's a long-ish note"), 5);
 });
 
@@ -180,14 +181,23 @@ test("requests carry the schema, the effort, and the cached instructions", () =>
   assert.ok(SCHEMA.properties.themes.items.enum.length === THEME_IDS.length);
 });
 
-test("the corpus keeps complete rounds and Google Play's first pass", async () => {
-  const { inCorpusApp, playFirstPass } = await import("../lib/corpus.mjs");
-  assert.ok(inCorpusApp({ platform: "apple" }), "round 1 has no round field");
-  assert.ok(inCorpusApp({ platform: "apple", round: 2 }));
-  assert.ok(!inCorpusApp({ platform: "apple", round: 3 }));
-  assert.ok(inCorpusApp({ platform: "play" }));
-  const first = Array.from({ length: 2400 }, (_, i) => ({ id: `p${i}`, country: "us" }));
-  const topUp = [{ id: "x1", country: "ng" }, { id: "x2", country: "us" }];
-  assert.strictEqual(playFirstPass([...first, ...topUp]).length, 2400);
-  assert.deepStrictEqual(playFirstPass([{ id: "a", country: "gb" }, { id: "b", country: "my" }]).map((r) => r.id), ["a"]);
+test("the corpus keeps apps whose collection finished without a failed pass", async () => {
+  const { completeMeta } = await import("../lib/corpus.mjs");
+  assert.ok(completeMeta({ passes: [{ country: "us", added: 3 }] }));
+  assert.ok(!completeMeta({ passes: [{ country: "us", error: "timeout" }] }));
+  assert.ok(!completeMeta(null));
+});
+
+test("collection rotates through categories within each round", async () => {
+  const { collectionOrder } = await import("../lib/collect.mjs");
+  const apps = [
+    { id: "a1", category: "a" }, { id: "a2", category: "a" }, { id: "a3", category: "a" },
+    { id: "b1", category: "b" }, { id: "c1", category: "c", round: 2 }, { id: "b2", category: "b" },
+  ];
+  assert.deepStrictEqual(collectionOrder(apps).map((a) => a.id), ["a1", "b1", "a2", "b2", "a3", "c1"]);
+});
+
+test("rank bands include the deep band past 100", async () => {
+  const { bandOf } = await import("../1-apps.mjs");
+  assert.deepStrictEqual([1, 10, 11, 50, 51, 100, 101, 200].map(bandOf), ["head", "head", "middle", "middle", "tail", "tail", "deep", "deep"]);
 });

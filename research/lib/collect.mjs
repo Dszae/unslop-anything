@@ -20,6 +20,23 @@ export function passesFor(appId, countries, sorts) {
   return order.flatMap((country) => sorts.map((sort) => ({ country, sort })));
 }
 
+// Rounds in order, and inside each round the categories in rotation, so that
+// a collection stopped at any point has covered every category evenly.
+export function collectionOrder(apps) {
+  const rounds = [...new Set(apps.map((a) => a.round || 1))].sort((a, b) => a - b);
+  const out = [];
+  for (const round of rounds) {
+    const byCategory = new Map();
+    for (const a of apps.filter((x) => (x.round || 1) === round)) {
+      if (!byCategory.has(a.category)) byCategory.set(a.category, []);
+      byCategory.get(a.category).push(a);
+    }
+    const queues = [...byCategory.values()];
+    for (let i = 0; queues.some((q) => i < q.length); i++) for (const q of queues) if (i < q.length) out.push(q[i]);
+  }
+  return out;
+}
+
 export function windowStart(now = new Date()) {
   const d = new Date(now);
   d.setUTCMonth(d.getUTCMonth() - WINDOW_MONTHS);
@@ -30,13 +47,23 @@ export function windowStart(now = new Date()) {
 // later pages are too.
 const NEWEST_FIRST = new Set(["mostrecent", "NEWEST"]);
 
-export async function collectPlatform(platform, { countries, sorts, fetchPass, limit, concurrency }) {
+export async function collectPlatform(platform, { countries, sorts, fetchPass, limit, concurrency, stopAt }) {
   const since = windowStart();
   const { apps } = readJson(dataPath("apps.json"));
-  const mine = apps.filter((a) => a.platform === platform).slice(0, limit ? Number(limit) : undefined);
+  const mine = collectionOrder(apps.filter((a) => a.platform === platform)).slice(0, limit ? Number(limit) : undefined);
   let done = 0;
   let total = 0;
+  // Count what is already collected, so --stop-at can stop starting new apps
+  // once the store reaches its target. Apps are in rotation order, so stopping
+  // early leaves every category covered evenly.
+  let collected = 0;
+  for (const a of mine) {
+    const f = dataPath("raw", platform, `${a.id}.meta.json`);
+    if (fs.existsSync(f)) collected += readJson(f).kept;
+  }
+  const target = Number(stopAt) || Infinity;
   await pool(mine, Number(concurrency) || CONCURRENCY, async (app) => {
+    if (collected >= target && !fs.existsSync(dataPath("raw", platform, `${app.id}.meta.json`))) return;
     const out = dataPath("raw", platform, `${app.id}.jsonl.gz`);
     const metaFile = dataPath("raw", platform, `${app.id}.meta.json`);
     const cap = CAP_PER_APP[platform];
@@ -45,6 +72,7 @@ export async function collectPlatform(platform, { countries, sorts, fetchPass, l
     let prior = [];
     let requests = 0;
     let todo = plan;
+    let byIdStart = 0;
     if (fs.existsSync(out) && fs.existsSync(metaFile)) {
       const meta = readJson(metaFile);
       if (!meta.passes.some((p) => p.error)) {
@@ -56,6 +84,7 @@ export async function collectPlatform(platform, { countries, sorts, fetchPass, l
           return;
         }
         for (const r of readJsonlGz(out)) byId.set(r.id, r);
+        byIdStart = byId.size;
         prior = meta.passes;
         requests = meta.requests;
       }
@@ -118,6 +147,7 @@ export async function collectPlatform(platform, { countries, sorts, fetchPass, l
       passes: [...prior, ...passes],
     });
     total += rows.length;
+    collected += rows.length - (prior.length ? byIdStart : 0);
     done++;
     log(`${platform} ${done}/${mine.length} ${app.name.slice(0, 40)}: ${rows.length} reviews, ${requests} requests (total ${total})`);
   });
