@@ -17,7 +17,7 @@
   <a href="https://github.com/erkamyaman/unslopovich"><img src="https://img.shields.io/github/stars/erkamyaman/unslopovich?style=social" alt="GitHub stars"></a>
 </p>
 
-<p align="center">1,201,466 app reviews read · 0 purple gradients found · 31 detector rules · one command</p>
+<p align="center">5,008,684 app reviews read · 1 purple gradient found · 31 detector rules · one command</p>
 
 <p align="center"><a href="research/README.md">The study behind it</a>: what people actually complain about, with the method and the code.</p>
 
@@ -61,28 +61,43 @@ The purple gradient above is the easy case. The harder one is the calm default t
 
 ## The doctor did the reading
 
-Dr. Unslopovich read 1,201,466 reviews of 1,162 apps on the App Store and Google Play. Not one mentioned a purple gradient. "Gradient" came up 58 times, mostly from people asking for one.
+Dr. Unslopovich read 5,008,684 reviews of 7,786 apps on the App Store and Google Play. "Gradient" came up 163 times, mostly from people asking for one. "Purple gradient" came up once, in a 2-star review asking Copilot to bring its blue and purple gradients back.
 
-Here's what the 529,434 reviews rated 3 stars or lower complained about instead:
+Here's what the 2,072,794 reviews rated 3 stars or lower complained about instead:
 
 | | App Store | Google Play |
 |---|---|---|
-| **It's broken.** Something just doesn't work | 29% | 36% |
-| **The business behind it.** Late deliveries, unfair games, bad drivers | 24% | 20% |
-| **Nobody helps.** Support, refunds, scams | 22% | 18% |
-| **It costs too much.** Paywalls, subscriptions, surprise charges | 20% | 14% |
-| **Can't get in.** Login, verification codes, locked accounts | 11% | 10% |
-| **You interrupted them.** Ads and popups mid-task | 10% | 13% |
-| **You moved the button.** A redesign moved or removed something | 9% | 6% |
-| **You hid everything.** Hard to find or use | 6% | 7% |
-| **You made it slow.** Lag, freezing, battery | 5% | 7% |
+| **It's broken.** Something just doesn't work | 35% | 35% |
+| **Nobody helps.** Support, refunds, scams | 22% | 20% |
+| **The business behind it.** Late deliveries, unfair games, bad drivers | 18% | 21% |
+| **It costs too much.** Paywalls, subscriptions, surprise charges | 20% | 18% |
+| **Can't get in.** Login, verification codes, locked accounts | 11% | 11% |
+| **You interrupted them.** Ads and popups mid-task | 9% | 12% |
+| **You hid everything.** Hard to find or use | 9% | 7% |
+| **You moved the button.** A redesign moved or removed something | 7% | 5% |
+| **You made it slow.** Lag, freezing, battery | 5% | 6% |
 | **It crashed.** | 5% | 4% |
-| **You never tried it on their phone.** Broken layouts | 2% | 2% |
 | **You put AI where the feature was.** | 2% | 1% |
+| **You never tried it on their phone.** Broken layouts | 1% | 1% |
 
-About a quarter of complaints (24% on the App Store, 25% on Google Play) are things a design and front-end pass can fix. Crashes, lag, and bugs together are 35% and 43%.
+About a quarter of complaints (26% on the App Store, 24% on Google Play) are things a design and front-end pass can fix. Crashes, lag, and bugs together are 41% on both.
 
 <sub>A random sample of 1,200 low-rated reviews, each read and labelled against written definitions; a review can name several problems. Rounded; 95% intervals are about ±3 to 4 points for the big themes. [The whole method, code, and limits.](research/README.md)</sub>
+
+And the 4-star reviews, from people who mostly like the app? 87% of them on the App Store and 61% on Google Play still name a problem. It's a different list:
+
+| | App Store | Google Play |
+|---|---|---|
+| **Add this.** A feature they want | 30% | 12% |
+| **It's broken.** | 25% | 18% |
+| **The business behind it.** | 15% | 15% |
+| **It costs too much.** | 12% | 7% |
+| **You hid everything.** | 11% | 5% |
+| **Nobody helps.** | 2% | 1% |
+
+Support and account trouble mostly drop out. What's left is "add this" and "this is broken". A design pass would fix 20% (App Store) and 12% (Google Play) of them.
+
+<sub>A second random sample of 300 4-star reviews, 150 per store, labelled the same way. Smaller, so intervals are about ±5 to 7 points.</sub>
 
 So the doctor checks what users actually scream about first, and your gradient second.
 

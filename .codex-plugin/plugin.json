@@ -1,6 +1,6 @@
 {
   "name": "unslopovich",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "Finds and fixes AI-looking, template-looking, and website-in-a-phone UI in mobile apps, web apps, and websites, checking user friction first.",
   "author": { "name": "Erkam Yaman", "url": "https://github.com/erkamyaman" },
   "homepage": "https://github.com/erkamyaman/unslopovich",
