@@ -37,6 +37,18 @@ Then tell your agent:
 
 Works in Claude Code, Codex, Cursor, OpenCode, Gemini CLI, and GitHub Copilot ([install options](#install)). Mobile apps, web apps, and websites. Same doctor, different reflexes: on a phone it checks you didn't build a website, and on the web it checks you didn't break one.
 
+## Same doctor, three patients
+
+The purple gradient above is the easy case. The harder one is the calm default today's models reach for: white cards, gray borders, one blue accent, a stat row, an AI banner. It looks fine, and it looks like every other app. The doctor treats that too, and the result should look like *your* app, whatever your style is.
+
+![A plant care app. Before: a white card layout with an AI insights banner, three stat tiles, emoji plant icons, and colored status dots. After: a deep green Fernly screen that leads with "3 plants are thirsty today" and a Water button for each one](docs/examples/plant.png)
+
+![A freight dispatch dashboard. Before: a welcome message, four KPI tiles, a gradient chart, an AI insights card, and two recent shipments. After: a dense Dockline board with late loads first, the reason each one is late, and who to call](docs/examples/dash.png)
+
+![A bakery website. Before: a centered hero with gradient text, an eyebrow label, "trusted by 10,000+", and three feature cards. After: a cobalt Nine Loaves page with today's bake, what has sold out, and a box to reserve a Saturday loaf](docs/examples/bakery.png)
+
+<sub>Illustrations of what a treatment aims for, drawn by hand from the skill's rules. The apps are made up.</sub>
+
 ## The doctor did the reading
 
 Dr. Unslopovich read 1,201,466 reviews of 1,162 apps on the App Store and Google Play. Not one mentioned a purple gradient. "Gradient" came up 58 times, mostly from people asking for one.
