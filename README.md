@@ -37,6 +37,14 @@ Then tell your agent:
 
 Works in Claude Code, Codex, Cursor, OpenCode, Gemini CLI, and GitHub Copilot ([install options](#install)). Mobile apps, web apps, and websites. Same doctor, different reflexes: on a phone it checks you didn't build a website, and on the web it checks you didn't break one.
 
+## A real run
+
+A coding agent built a tool library app from one prompt. It looked fine. Then the skill ran on it for real:
+
+![A real run on a 375 px phone. Before: the page is 595 px wide, so the Plan return button, the due date badges, and Loan history are cut off at the right edge. After: everything fits on the screen](docs/examples/real.png)
+
+Score 14 to 18 out of 24. Detector findings 8 to 2. It also caught a date typed in by hand, so the app said "Monday, November 16" every day, and gray text too light to read. The look was already decent, so it kept it. [The prompt, the code before, the diff, and the full report.](docs/examples/real-run/)
+
 ## Same doctor, three patients
 
 The purple gradient above is the easy case. The harder one is the calm default today's models reach for: white cards, gray borders, one blue accent, a stat row, an AI banner. It looks fine, and it looks like every other app. The doctor treats that too, and the result should look like *your* app, whatever your style is.
