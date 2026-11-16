@@ -37,6 +37,16 @@ Then tell your agent:
 
 Works in Claude Code, Codex, Cursor, OpenCode, Gemini CLI, and GitHub Copilot ([install options](#install)). Mobile apps, web apps, and websites. Same doctor, different reflexes: on a phone it checks you didn't build a website, and on the web it checks you didn't break one.
 
+## A real run
+
+We ran it on [QuizHub](https://github.com/ramkrishnajha5/QuizHub), an open-source quiz app, and changed nothing by hand:
+
+![QuizHub's quiz setup screen on a phone. Before: two gradient banners, sparkle icons, emoji folder tiles, a quiz summary box and a gradient Start button. After: a plain "Start a quiz" title, folders and tests as list rows, labeled Topic and Length, and a button that says "Start 15-question quiz"](docs/examples/quizhub.png)
+
+Score 10 to 18 out of 24. Detector findings on this screen 39 to 0. It also found that when the topic list fails to load, the screen showed an empty dropdown and a dead button and said nothing. Now it says so and offers Try again. [The report and the diff.](docs/examples/quizhub/)
+
+<sub>The sandbox blocked the app's database, so both sides show the same sample data.</sub>
+
 ## Same doctor, three patients
 
 The purple gradient above is the easy case. The harder one is the calm default today's models reach for: white cards, gray borders, one blue accent, a stat row, an AI banner. It looks fine, and it looks like every other app. The doctor treats that too, and the result should look like *your* app, whatever your style is.
