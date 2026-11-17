@@ -1,6 +1,8 @@
 {
   "name": "unslopovich",
   "version": "3.0.0",
+  "author": "Erkam Yaman (https://github.com/erkamyaman)",
+  "funding": "https://github.com/sponsors/erkamyaman",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/erkamyaman/unslopovich.git"
