@@ -229,4 +229,6 @@ Want to hear when a new version is out? Star the repo, then **Watch → Custom �
 
 ## License
 
-MIT
+MIT © [Erkam Yaman](https://github.com/erkamyaman)
+
+If it saved you a redesign, you can [sponsor me](https://github.com/sponsors/erkamyaman).
