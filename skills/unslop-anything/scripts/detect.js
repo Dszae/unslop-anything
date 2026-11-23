@@ -33,7 +33,7 @@ const STACK_BY_EXT = {
 const SKIP_DIRS = new Set([
   "node_modules", ".git", "Pods", "build", "dist", ".expo", ".dart_tool",
   "DerivedData", ".gradle", ".idea", ".vscode", "coverage", "vendor", ".next",
-  "www", ".unslopovich", "Carthage", ".build", "generated", "__generated__",
+  "www", ".unslop-anything", ".unslopovich", "Carthage", ".build", "generated", "__generated__",
 ]);
 
 const TEST_FILE = /(^|[./_-])(test|tests|spec|stories|story|preview|previews|fixture|fixtures|mock|mocks)\.[a-z]+$|Tests?\.(swift|kt)$|_test\.dart$|PreviewParameterProvider\.kt$|Previews?\.(swift|kt)$/i;
@@ -219,7 +219,7 @@ const rules = [
     severity: "noticeable",
     stacks: null,
     message: "Purple, indigo, or pink gradient: the default AI palette.",
-    fix: "Use a flat surface from the theme. Keep a gradient only if it comes from the brand (logo, icon) and record that in .unslopovich/decisions.md.",
+    fix: "Use a flat surface from the theme. Keep a gradient only if it comes from the brand (logo, icon) and record that in .unslop-anything/decisions.md.",
     find({ code, file }) {
       if (/icon|logo|brand/i.test(path.basename(file))) return [];
       const hits = [];
@@ -795,10 +795,10 @@ function loadConfig(root) {
   // directory's config is the last fallback.
   const candidates = [];
   for (let dir = path.resolve(root); ; dir = path.dirname(dir)) {
-    candidates.push(path.join(dir, ".unslopovich", "config.json"));
+    candidates.push(path.join(dir, ".unslop-anything", "config.json"), path.join(dir, ".unslopovich", "config.json"));
     if (path.dirname(dir) === dir) break;
   }
-  candidates.push(path.join(process.cwd(), ".unslopovich", "config.json"));
+  candidates.push(path.join(process.cwd(), ".unslop-anything", "config.json"), path.join(process.cwd(), ".unslopovich", "config.json"));
   for (const file of candidates) {
     try {
       const raw = JSON.parse(fs.readFileSync(file, "utf8"));
@@ -878,7 +878,7 @@ function ignoredByComment(lines, line, ruleId) {
   const own = previous && /^\s*(?:\/\/|\/\*|\*|<!--|#)/.test(previous) ? previous : null;
   for (const l of [lines[line - 1], own]) {
     if (!l) continue;
-    const m = /unslopovich-ignore(?:\s+([\w-]+(?:\s*,\s*[\w-]+)*))?/.exec(l);
+    const m = /(?:unslop-anything|unslopovich)-ignore(?:\s+([\w-]+(?:\s*,\s*[\w-]+)*))?/.exec(l);
     if (m && (!m[1] || m[1].split(/\s*,\s*/).includes(ruleId))) return true;
   }
   return false;
@@ -966,7 +966,7 @@ function formatText(result) {
       }
       out.push(`  ${String(f.line).padStart(4)}  ${f.severity.padEnd(10)}  ${f.rule.padEnd(18)}  ${f.message}`);
     }
-    out.push("", "Fixes: npx unslopovich detect --list-rules");
+    out.push("", "Fixes: npx unslop-anything detect --list-rules");
   }
   out.push("Static checks only. Nothing was run, profiled, or tapped. A clean scan is not a clean bill of health.");
   return out.join("\n");
@@ -978,14 +978,14 @@ function listRules() {
     .join("\n");
 }
 
-const USAGE = `Usage: unslopovich detect [paths...] [--json] [--platform mobile|web] [--ignore rule,rule] [--include-tests] [--list-rules]
+const USAGE = `Usage: unslop-anything detect [paths...] [--json] [--platform mobile|web] [--ignore rule,rule] [--include-tests] [--list-rules]
 
 Scans mobile and web source for generated-looking UI, website-in-a-phone patterns,
 and accessibility and motion defaults. The platform comes from the nearest
 package.json; --platform overrides it.
 Exit code: 0 clean, 2 findings, 1 error.
-Silence one line with a comment: unslopovich-ignore <rule-id>
-Project config: .unslopovich/config.json  { "ignoreRules": [], "ignorePaths": [] }`;
+Silence one line with a comment: unslop-anything-ignore <rule-id>
+Project config: .unslop-anything/config.json  { "ignoreRules": [], "ignorePaths": [] }`;
 
 function main(argv) {
   const args = argv.slice();

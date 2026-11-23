@@ -1,10 +1,10 @@
 {
-  "name": "unslopovich",
+  "name": "unslop-anything",
   "description": "Dr. Unslopovich: finds and fixes AI-looking UI in mobile apps, web apps, and websites.",
   "owner": { "name": "Erkam Yaman" },
   "plugins": [
     {
-      "name": "unslopovich",
+      "name": "unslop-anything",
       "source": "./",
       "description": "Finds and fixes AI-looking, template-looking, and website-in-a-phone UI, checking user friction first."
     }

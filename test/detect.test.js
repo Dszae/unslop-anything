@@ -3,7 +3,7 @@
 const test = require("node:test");
 const assert = require("node:assert");
 const path = require("path");
-const { scan, scanSource, rules, isSlopHue, main } = require("../skills/unslopovich/scripts/detect.js");
+const { scan, scanSource, rules, isSlopHue, main } = require("../skills/unslop-anything/scripts/detect.js");
 
 const fixtures = path.join(__dirname, "fixtures");
 const rulesIn = (file) => new Set(scan([path.join(fixtures, "slop", file)]).findings.map((f) => f.rule));
@@ -61,6 +61,11 @@ test("URLs in strings do not start a comment", () => {
 });
 
 test("inline ignore comments silence a line", () => {
+  const src = '// unslop-anything-ignore oops-error\nconst a = "Oops";\nconst b = "Oops"; // unslop-anything-ignore\nconst c = "Oops";\n';
+  assert.deepStrictEqual(scanSource(src, "a.ts").map((f) => f.line), [4]);
+});
+
+test("ignore comments from before the rename still work", () => {
   const src = '// unslopovich-ignore oops-error\nconst a = "Oops";\nconst b = "Oops"; // unslopovich-ignore\nconst c = "Oops";\n';
   assert.deepStrictEqual(scanSource(src, "a.ts").map((f) => f.line), [4]);
 });
@@ -134,11 +139,26 @@ test("Android color resources reach template-theme", () => {
 });
 
 test("XML ignore comments work", () => {
-  const src = '<resources>\n  <!-- unslopovich-ignore template-theme -->\n  <color name="purple_500">#6200EE</color>\n</resources>\n';
+  const src = '<resources>\n  <!-- unslop-anything-ignore template-theme -->\n  <color name="purple_500">#6200EE</color>\n</resources>\n';
   assert.deepStrictEqual(scanSource(src, "colors.xml"), []);
 });
 
 test("project config is found above the scan target", () => {
+  const fs = require("fs");
+  const os = require("os");
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "unslop-"));
+  fs.mkdirSync(path.join(root, ".unslop-anything"));
+  fs.writeFileSync(path.join(root, ".unslop-anything", "config.json"), JSON.stringify({ ignoreRules: ["oops-error"] }));
+  fs.mkdirSync(path.join(root, "src", "screens"), { recursive: true });
+  fs.writeFileSync(path.join(root, "src", "screens", "A.ts"), 'const a = "Oops";\n');
+  try {
+    assert.deepStrictEqual(scan([path.join(root, "src", "screens")]).findings, []);
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("a config from before the rename is still read", () => {
   const fs = require("fs");
   const os = require("os");
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "unslop-"));
@@ -204,4 +224,22 @@ test("mobile-only rules stay quiet on web projects", () => {
 test("--platform overrides the detected project kind", () => {
   const found = new Set(scan([path.join(fixtures, "slop", "web")], { platform: "mobile" }).findings.map((f) => f.rule));
   assert.ok(found.has("hover-only"));
+});
+
+test("the installer replaces a skill folder from before the rename", () => {
+  const fs = require("fs");
+  const os = require("os");
+  const { execFileSync } = require("child_process");
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "unslop-install-"));
+  fs.mkdirSync(path.join(dir, "unslopovich"));
+  fs.writeFileSync(path.join(dir, "unslopovich", "SKILL.md"), "---\nname: unslopovich\n---\n");
+  fs.mkdirSync(path.join(dir, "other"));
+  try {
+    execFileSync(process.execPath, [path.join(__dirname, "..", "bin", "install.js"), "--dir", dir]);
+    assert.ok(fs.existsSync(path.join(dir, "unslop-anything", "SKILL.md")));
+    assert.ok(!fs.existsSync(path.join(dir, "unslopovich")));
+    assert.ok(fs.existsSync(path.join(dir, "other")));
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
 });

@@ -1,9 +1,9 @@
 {
-  "name": "unslopovich",
+  "name": "unslop-anything",
   "description": "Finds and fixes AI-looking, template-looking, and website-in-a-phone UI in mobile apps, web apps, and websites, checking user friction first.",
   "author": { "name": "Erkam Yaman", "url": "https://github.com/erkamyaman" },
-  "homepage": "https://github.com/erkamyaman/unslopovich",
-  "repository": "https://github.com/erkamyaman/unslopovich",
+  "homepage": "https://github.com/erkamyaman/unslop-anything",
+  "repository": "https://github.com/erkamyaman/unslop-anything",
   "license": "MIT",
   "keywords": ["design", "ui", "ux", "mobile", "web", "ai-slop"]
 }

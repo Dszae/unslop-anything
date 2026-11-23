@@ -86,7 +86,7 @@ Every changed screen meets these before you call it done. They do not bend.
 
 ## Waivers
 
-A tell can stay when there is a real reason: the brand, a user need, a platform constraint. Record it under Accepted in `.unslopovich/chart.md` with the reason, and list it under Waived in the report. A tell kept without a reason is not a waiver; it is a finding.
+A tell can stay when there is a real reason: the brand, a user need, a platform constraint. Record it under Accepted in `.unslop-anything/chart.md` with the reason, and list it under Waived in the report. A tell kept without a reason is not a waiver; it is a finding.
 
 ## Self-check before you hand it back
 

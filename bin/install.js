@@ -5,7 +5,7 @@ const path = require("path");
 
 const args = process.argv.slice(2);
 const root = path.join(__dirname, "..");
-const skill = path.join(root, "skills", "unslopovich");
+const skill = path.join(root, "skills", "unslop-anything");
 
 if (args[0] === "detect") {
   process.exitCode = require(path.join(skill, "scripts", "detect.js")).main(args.slice(1));
@@ -19,20 +19,20 @@ const home = os.homedir();
 // Cursor and OpenCode also read ~/.claude/skills and ~/.agents/skills, so a
 // global install for them goes to the shared folder.
 const AGENTS = {
-  claude: { name: "Claude Code", global: ".claude/skills", project: ".claude/skills", seen: [".claude"], call: "/unslopovich" },
-  codex: { name: "Codex", global: ".agents/skills", project: ".agents/skills", seen: [".codex"], call: "$unslopovich" },
-  cursor: { name: "Cursor", global: ".agents/skills", project: ".cursor/skills", seen: [".cursor"], call: "/unslopovich" },
-  opencode: { name: "OpenCode", global: ".agents/skills", project: ".opencode/skills", seen: [".config/opencode", ".opencode"], call: "/unslopovich" },
-  gemini: { name: "Gemini CLI", global: null, project: ".gemini/skills", seen: [".gemini"], call: "/unslopovich" },
-  copilot: { name: "GitHub Copilot", global: null, project: ".github/skills", seen: [], call: "/unslopovich" },
+  claude: { name: "Claude Code", global: ".claude/skills", project: ".claude/skills", seen: [".claude"], call: "/unslop-anything" },
+  codex: { name: "Codex", global: ".agents/skills", project: ".agents/skills", seen: [".codex"], call: "$unslop-anything" },
+  cursor: { name: "Cursor", global: ".agents/skills", project: ".cursor/skills", seen: [".cursor"], call: "/unslop-anything" },
+  opencode: { name: "OpenCode", global: ".agents/skills", project: ".opencode/skills", seen: [".config/opencode", ".opencode"], call: "/unslop-anything" },
+  gemini: { name: "Gemini CLI", global: null, project: ".gemini/skills", seen: [".gemini"], call: "/unslop-anything" },
+  copilot: { name: "GitHub Copilot", global: null, project: ".github/skills", seen: [], call: "/unslop-anything" },
 };
 
 const usage = `Usage:
-  npx unslopovich                      install for every agent found on this machine
-  npx unslopovich --agent codex,cursor install for these agents (${Object.keys(AGENTS).join(", ")})
-  npx unslopovich --project            install into this project instead of your home folder
-  npx unslopovich --dir <folder>       install into any skills folder
-  npx unslopovich detect [paths...]    scan mobile and web source for slop`;
+  npx unslop-anything                      install for every agent found on this machine
+  npx unslop-anything --agent codex,cursor install for these agents (${Object.keys(AGENTS).join(", ")})
+  npx unslop-anything --project            install into this project instead of your home folder
+  npx unslop-anything --dir <folder>       install into any skills folder
+  npx unslop-anything detect [paths...]    scan mobile and web source for slop`;
 
 function option(name) {
   const i = args.indexOf(name);
@@ -49,8 +49,18 @@ if (args.includes("--help") || args.includes("-h")) {
   return;
 }
 
+function removeOldSkill(base) {
+  const old = path.join(base, "unslopovich");
+  try {
+    if (/^name:\s*unslopovich\s*$/m.test(fs.readFileSync(path.join(old, "SKILL.md"), "utf8"))) {
+      fs.rmSync(old, { recursive: true, force: true });
+    }
+  } catch {}
+}
+
 function copySkill(base) {
-  const dest = path.join(base, "unslopovich");
+  removeOldSkill(base);
+  const dest = path.join(base, "unslop-anything");
   fs.mkdirSync(dest, { recursive: true });
   for (const entry of fs.readdirSync(skill)) {
     fs.rmSync(path.join(dest, entry), { recursive: true, force: true });
@@ -62,7 +72,7 @@ function copySkill(base) {
 const dir = option("--dir");
 if (dir) {
   const dest = copySkill(path.resolve(dir.replace(/^~(?=$|\/)/, home)));
-  console.log(`Dr. Unslopovich will see you now.\nInstalled to ${dest}\nNext, ask your agent: review my app with unslopovich`);
+  console.log(`Dr. Unslopovich will see you now.\nInstalled to ${dest}\nNext, ask your agent: review my app with unslop-anything`);
   return;
 }
 

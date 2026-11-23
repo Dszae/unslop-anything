@@ -1,6 +1,6 @@
 # The chart
 
-`.unslopovich/chart.md` is the project's standing context. Every command reads it. `chart` writes it.
+`.unslop-anything/chart.md` is the project's standing context. Every command reads it. `chart` writes it.
 
 ## Writing it
 
@@ -43,4 +43,4 @@ Visits: on
 
 ## Accepted exceptions
 
-When the user decides a tell stays, add it under Accepted with the reason. For detector rules, also add the rule id to `ignoreRules` in `.unslopovich/config.json` if it applies project-wide, or an inline `unslopovich-ignore <rule-id>` comment if it applies to one line. Do not re-flag accepted items in later visits.
+When the user decides a tell stays, add it under Accepted with the reason. For detector rules, also add the rule id to `ignoreRules` in `.unslop-anything/config.json` if it applies project-wide, or an inline `unslop-anything-ignore <rule-id>` comment if it applies to one line. Do not re-flag accepted items in later visits.

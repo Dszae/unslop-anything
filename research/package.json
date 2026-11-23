@@ -1,5 +1,5 @@
 {
-  "name": "unslopovich-research",
+  "name": "unslop-anything-research",
   "private": true,
   "type": "module",
   "description": "Collects and classifies app store reviews to find what users complain about. Not shipped with the skill.",

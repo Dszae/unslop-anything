@@ -2,19 +2,21 @@
   <img src="docs/logo.svg" width="160" height="160" alt="A phone with a stethoscope listening to it">
 </p>
 
-<h1 align="center">unslopovich</h1>
+<h1 align="center">unslop-anything</h1>
 
 <p align="center"><em>Your app looks AI-generated. Dr. Unslopovich noticed.</em></p>
+
+<p align="center"><sub>Renamed from unslopovich in 3.1.0. Old <code>unslopovich-ignore</code> comments and <code>.unslopovich/</code> folders keep working, and <code>npx unslop-anything</code> replaces an old install.</sub></p>
 
 <p align="center"><em>Users don't hate your purple gradient. They hate what you did to the back button.</em></p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/unslopovich"><img src="https://img.shields.io/npm/v/unslopovich?color=E2862A&label=npm" alt="npm version"></a>
+  <a href="https://www.npmjs.com/package/unslop-anything"><img src="https://img.shields.io/npm/v/unslop-anything?color=E2862A&label=npm" alt="npm version"></a>
   <a href="#install"><img src="https://img.shields.io/badge/works%20with-6%20agents-E2862A" alt="Works with 6 agents"></a>
-  <a href="https://github.com/erkamyaman/unslopovich/actions/workflows/test.yml"><img src="https://img.shields.io/github/actions/workflow/status/erkamyaman/unslopovich/test.yml?branch=main&label=tests" alt="Tests"></a>
+  <a href="https://github.com/erkamyaman/unslop-anything/actions/workflows/test.yml"><img src="https://img.shields.io/github/actions/workflow/status/erkamyaman/unslop-anything/test.yml?branch=main&label=tests" alt="Tests"></a>
   <img src="https://img.shields.io/badge/deps-0-brightgreen" alt="No dependencies">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-E2862A" alt="MIT license"></a>
-  <a href="https://github.com/erkamyaman/unslopovich"><img src="https://img.shields.io/github/stars/erkamyaman/unslopovich?style=social" alt="GitHub stars"></a>
+  <a href="https://github.com/erkamyaman/unslop-anything"><img src="https://img.shields.io/github/stars/erkamyaman/unslop-anything?style=social" alt="GitHub stars"></a>
 </p>
 
 <p align="center">5,008,684 app reviews read · 1 purple gradient found · 31 detector rules · one command</p>
@@ -26,13 +28,13 @@
 <sub>Dramatization. Your app may be worse.</sub>
 
 ```bash
-npx unslopovich
+npx unslop-anything
 ```
 
 Then tell your agent:
 
 ```text
-/unslopovich review my app
+/unslop-anything review my app
 ```
 
 Works in Claude Code, Codex, Cursor, OpenCode, Gemini CLI, and GitHub Copilot ([install options](#install)). Mobile apps, web apps, and websites. Same doctor, different reflexes: on a phone it checks you didn't build a website, and on the web it checks you didn't break one.
@@ -120,23 +122,23 @@ The biggest bucket is the one no design review can see: you can't read a bug or 
 ## Appointments
 
 ```text
-/unslopovich review the home screen     diagnosis and a score out of 24, no edits
-/unslopovich treat checkout             diagnose, fix, verify, before and after
-/unslopovich scan src/                  quick code-only pass with the detector
-/unslopovich chart                      write down your top tasks and brand rules once
-/unslopovich follow-up home             re-check and compare with the last visit
+/unslop-anything review the home screen     diagnosis and a score out of 24, no edits
+/unslop-anything treat checkout             diagnose, fix, verify, before and after
+/unslop-anything scan src/                  quick code-only pass with the detector
+/unslop-anything chart                      write down your top tasks and brand rules once
+/unslop-anything follow-up home             re-check and compare with the last visit
 ```
 
-The chart lives in `.unslopovich/chart.md`. It's where you tell the doctor that the gradient is the brand, so it stops bringing it up.
+The chart lives in `.unslop-anything/chart.md`. It's where you tell the doctor that the gradient is the brand, so it stops bringing it up.
 
 ## The detector
 
 Thirty-one rules that read SwiftUI, UIKit, Compose, Android XML, React Native, Flutter, Ionic, React, Vue, Svelte, Astro, HTML, CSS, and Tailwind classes. No model, no network, no dependencies. The skill runs it for you, and it works on its own too:
 
 ```bash
-npx unslopovich detect src/
-npx unslopovich detect --json ios/ android/   # for agents and CI
-npx unslopovich detect --list-rules           # every rule and its fix
+npx unslop-anything detect src/
+npx unslop-anything detect --json ios/ android/   # for agents and CI
+npx unslop-anything detect --list-rules           # every rule and its fix
 ```
 
 It catches purple gradients and the project template's leftover purple, nested cards, decorative status dots, gradient text, glow shadows, emoji icons, unvirtualized lists, text that ignores the user's font size, disabled back gestures, hamburger menus, hover in a touch app, keyboards covering inputs, invented stats, and "Oops! Something went wrong".
@@ -145,7 +147,7 @@ On the web it adds clickable divs, removed focus rings, disabled zoom, images wi
 
 It reads the nearest `package.json` to tell a phone app from a website, so hover is a problem in your Expo app and fine on your Next.js site. `--platform web` or `--platform mobile` settles it when it guesses wrong.
 
-Exit code `2` means findings, so it can gate a pull request. Silence one line with `// unslopovich-ignore <rule-id>` (`<!-- unslopovich-ignore <rule-id> -->` in XML), or a whole rule in `.unslopovich/config.json`:
+Exit code `2` means findings, so it can gate a pull request. Silence one line with `// unslop-anything-ignore <rule-id>` (`<!-- unslop-anything-ignore <rule-id> -->` in XML), or a whole rule in `.unslop-anything/config.json`:
 
 ```json
 { "ignoreRules": ["status-dot"], "ignorePaths": ["src/legacy/"] }
@@ -179,42 +181,42 @@ Only want the bad news? Ask for a review and it stops at the diagnosis.
 
 ## Prior art
 
-The doctor trained under good people. [Impeccable](https://github.com/pbakaus/impeccable) by Paul Bakaus showed that a deterministic detector and design vocabulary beat a longer prompt. [Hallmark](https://github.com/Nutlope/hallmark) by Together AI showed the value of a floor that never bends, defaults you can only waive on the record, and a fresh-eyed reviewer at the end. [Unslop](https://github.com/heydamir/unslop) by Damir Sokolovsky ([@heydamir](https://x.com/heydamir)) showed that deciding how much to change comes before changing anything, and that richness belongs in the content, not the chrome. Unslopovich is for the screens they leave to others: native mobile apps, and the parts of a web app people use every day.
+The doctor trained under good people. [Impeccable](https://github.com/pbakaus/impeccable) by Paul Bakaus showed that a deterministic detector and design vocabulary beat a longer prompt. [Hallmark](https://github.com/Nutlope/hallmark) by Together AI showed the value of a floor that never bends, defaults you can only waive on the record, and a fresh-eyed reviewer at the end. [Unslop](https://github.com/heydamir/unslop) by Damir Sokolovsky ([@heydamir](https://x.com/heydamir)) showed that deciding how much to change comes before changing anything, and that richness belongs in the content, not the chrome. unslop-anything is for the screens they leave to others: native mobile apps, and the parts of a web app people use every day.
 
 ## Install
 
 ```bash
-npx unslopovich
+npx unslop-anything
 ```
 
 The installer finds the coding agents on your machine and installs for each one. Needs Node 18 or later.
 
 | Agent | Installed to | Then type |
 |---|---|---|
-| Claude Code | `~/.claude/skills/unslopovich` | `/unslopovich review my app` |
-| Codex | `~/.agents/skills/unslopovich` | `$unslopovich review my app` |
-| Cursor | `~/.agents/skills/unslopovich` (Cursor reads it there) | `/unslopovich review my app` |
-| OpenCode | `~/.agents/skills/unslopovich` (OpenCode reads it there) | `/unslopovich review my app` |
-| Gemini CLI | `.gemini/skills/unslopovich`, per project | `/unslopovich review my app` |
-| GitHub Copilot | `.github/skills/unslopovich`, per project | `/unslopovich review my app` |
+| Claude Code | `~/.claude/skills/unslop-anything` | `/unslop-anything review my app` |
+| Codex | `~/.agents/skills/unslop-anything` | `$unslop-anything review my app` |
+| Cursor | `~/.agents/skills/unslop-anything` (Cursor reads it there) | `/unslop-anything review my app` |
+| OpenCode | `~/.agents/skills/unslop-anything` (OpenCode reads it there) | `/unslop-anything review my app` |
+| Gemini CLI | `.gemini/skills/unslop-anything`, per project | `/unslop-anything review my app` |
+| GitHub Copilot | `.github/skills/unslop-anything`, per project | `/unslop-anything review my app` |
 
 Or just ask in your own words ("review my app for AI slop") and the agent picks the skill up.
 
-- **Some agents only:** `npx unslopovich --agent codex,cursor` (any of `claude`, `codex`, `cursor`, `opencode`, `gemini`, `copilot`)
-- **One project, for the whole team:** run `npx unslopovich --project` in the project and commit the folder it creates
-- **Any other agent that reads `SKILL.md`:** `npx unslopovich --dir path/to/its/skills`
-- **As a Claude Code plugin:** `/plugin marketplace add erkamyaman/unslopovich`, then `/plugin install unslopovich@unslopovich`
-- **As a Codex plugin:** `codex plugin marketplace add erkamyaman/unslopovich`, then `codex plugin add unslopovich@unslopovich`
-- **With the open skills installer:** `npx skills add erkamyaman/unslopovich`
-- **By hand:** copy `skills/unslopovich` from this repo into your agent's skills folder
+- **Some agents only:** `npx unslop-anything --agent codex,cursor` (any of `claude`, `codex`, `cursor`, `opencode`, `gemini`, `copilot`)
+- **One project, for the whole team:** run `npx unslop-anything --project` in the project and commit the folder it creates
+- **Any other agent that reads `SKILL.md`:** `npx unslop-anything --dir path/to/its/skills`
+- **As a Claude Code plugin:** `/plugin marketplace add erkamyaman/unslop-anything`, then `/plugin install unslop-anything@unslop-anything`
+- **As a Codex plugin:** `codex plugin marketplace add erkamyaman/unslop-anything`, then `codex plugin add unslop-anything@unslop-anything`
+- **With the open skills installer:** `npx skills add erkamyaman/unslop-anything`
+- **By hand:** copy `skills/unslop-anything` from this repo into your agent's skills folder
 
 The skill is `SKILL.md`, a `reference/` folder it reads on demand, and the detector in `scripts/`.
 
 ## Update or remove
 
-Run `npx unslopovich` again to update. As a plugin, `/plugin marketplace update unslopovich` in Claude Code or `codex plugin marketplace upgrade` in Codex.
+Run `npx unslop-anything` again to update. As a plugin, `/plugin marketplace update unslop-anything` in Claude Code or `codex plugin marketplace upgrade` in Codex.
 
-To remove it, delete the `unslopovich` folder from your agent's skills folder (the table above says where), or `/plugin uninstall unslopovich@unslopovich` and `codex plugin remove unslopovich@unslopovich`. It leaves only `.unslopovich/` in your project, if you made a chart.
+To remove it, delete the `unslop-anything` folder from your agent's skills folder (the table above says where), or `/plugin uninstall unslop-anything@unslop-anything` and `codex plugin remove unslop-anything@unslop-anything`. It leaves only `.unslop-anything/` in your project, if you made a chart.
 
 ## What it won't do
 
@@ -223,7 +225,7 @@ To remove it, delete the `unslopovich` folder from your agent's skills folder (t
 - **It won't fix your bugs.** The biggest complaint in the study is "it's broken". That's your test suite's job.
 - **Taste is still taste.** The rules come from reviews and platform guidelines, but the final call on how your app looks is yours. Write it in the chart.
 
-If something it flags is wrong, [open an issue](https://github.com/erkamyaman/unslopovich/issues) with the line. False positives get fixed first.
+If something it flags is wrong, [open an issue](https://github.com/erkamyaman/unslop-anything/issues) with the line. False positives get fixed first.
 
 Want to hear when a new version is out? Star the repo, then **Watch → Custom → Releases**.
 
