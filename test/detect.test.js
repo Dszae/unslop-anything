@@ -218,6 +218,21 @@ test("slop-gradient reads Android #AARRGGBB colors", () => {
   assert.deepStrictEqual(scanSource(scrim, "a.css"), []);
 });
 
+test("0xRRGGBB colors are read alongside 0xFFRRGGBB", () => {
+  // Issue #42: the common Swift form Color(hex: 0x7C3AED) was missed.
+  const shadow = 'Text("x").shadow(color: Color(hex: 0x7C3AED), radius: 20)\n';
+  assert.deepStrictEqual(scanSource(shadow, "a.swift").map((f) => f.rule), ["glow-shadow"]);
+  const shadowFF = 'Text("x").shadow(color: Color(hex: 0xFF7C3AED), radius: 20)\n';
+  assert.deepStrictEqual(scanSource(shadowFF, "a.swift").map((f) => f.rule), ["glow-shadow"]);
+  const gradient = "LinearGradient(gradient: Gradient(colors: [Color(hex: 0x7C3AED), Color(hex: 0xEC4899)]), startPoint: .top, endPoint: .bottom)\n";
+  assert.deepStrictEqual(scanSource(gradient, "a.swift").map((f) => f.rule), ["slop-gradient"]);
+  // Neutral 6-digit colors stay quiet, and an 8-digit gray is not misread as pink.
+  const gray = 'Text("x").shadow(color: Color(hex: 0x9CA3AF), radius: 20)\n';
+  assert.deepStrictEqual(scanSource(gray, "a.swift"), []);
+  const grayFF = 'Text("x").shadow(color: Color(hex: 0xFF808080), radius: 20)\n';
+  assert.deepStrictEqual(scanSource(grayFF, "a.swift"), []);
+});
+
 test("hexColors reads #RRGGBBAA, #RGB and #RGBA (issue #41)", () => {
   const shadow = ".card { box-shadow: 0 0 24px #7c3aed80; }\n";
   assert.deepStrictEqual(scanSource(shadow, "a.css").map((f) => f.rule), ["glow-shadow"]);
