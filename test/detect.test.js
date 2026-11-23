@@ -293,6 +293,14 @@ test("slop-gradient reads only the gradient's own colors (issue #67)", () => {
     ["val d = GradientDrawable()\nd.colors = intArrayOf(\n  0xFF7C3AED.toInt()\n)\n", "a.kt", [1]],
     // A reassigned variable: each gradient keeps only its own stops.
     ['let g = ctx.createLinearGradient(0, 0, 1, 0);\ng.addColorStop(0, "#ffffff");\ng = ctx.createLinearGradient(0, 0, 1, 0);\ng.addColorStop(0, "#7c3aed");\n', "a.js", [3]],
+    // A declaration of the same name in a nested block shadows the variable;
+    // it does not end it.
+    ['const g = ctx.createLinearGradient(0, 0, 1, 0);\nfunction helper() {\n  const g = null;\n}\ng.addColorStop(0, "#7c3aed");\n', "a.js", [1]],
+    // The variable ends with its block: a sibling function's own g is another gradient.
+    ['function a() {\n  const g = ctx.createLinearGradient(0, 0, 1, 0);\n  g.addColorStop(0, "#ffffff");\n}\nfunction b() {\n  const g = ctx.createLinearGradient(0, 0, 1, 0);\n  g.addColorStop(0, "#7c3aed");\n}\n', "a.js", [6]],
+    // A "$" identifier, and a member of another object that shares the name.
+    ['const $g = ctx.createLinearGradient(0, 0, 1, 0);\n$g.addColorStop(0, "#7c3aed");\n', "a.js", [1]],
+    ['const g = ctx.createLinearGradient(0, 0, 1, 0);\ng.addColorStop(0, "#ffffff");\nother.g.addColorStop(0, "#7c3aed");\n', "a.js", []],
   ];
   for (const [src, file, lines] of spread) assert.deepStrictEqual(gradientLines(src, file), lines, src);
 });

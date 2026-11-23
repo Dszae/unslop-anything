@@ -234,7 +234,37 @@ function closeOf(text, open) {
   return text.length;
 }
 
-const COLOR_SIGN = /#[0-9a-fA-F]{3,8}\b|0x[0-9a-fA-F]{6,8}\b|\b(?:rgba?|hsla?|oklch|oklab)\(|\bColors?\.\w|\.(?:purple|indigo|pink|blue|red|green|orange|yellow|white|black|gray|grey)\b/;
+// The part of `rest` (the text after a gradient's constructor) during which
+// `variable` still holds that gradient: up to the end of the enclosing block,
+// or up to the variable's next assignment. A declaration of the same name in a
+// nested block (a helper's own `const g`) shadows it and does not end it.
+function bindingRegion(rest, variable) {
+  let depth = 0;
+  let blockEnd = rest.length;
+  for (let i = 0; i < rest.length; i++) {
+    if (rest[i] === "{") depth++;
+    else if (rest[i] === "}" && --depth < 0) { blockEnd = i; break; }
+  }
+  const region = rest.slice(0, blockEnd);
+  const write = new RegExp(`(?<![\\w$.])(?:(?:const|let|var|val)\\s+)?${variable}\\s*=(?!=)`);
+  for (const m of matches(write, region)) {
+    const declaredInNestedBlock =
+      /^(?:const|let|var|val)\s/.test(m[0]) && blockDepth(region, m.index) > 0;
+    if (!declaredInNestedBlock) return region.slice(0, m.index);
+  }
+  return region;
+}
+
+function blockDepth(text, index) {
+  let depth = 0;
+  for (let i = 0; i < index; i++) {
+    if (text[i] === "{") depth++;
+    else if (text[i] === "}") depth--;
+  }
+  return depth;
+}
+
+const COLOR_SIGN =/#[0-9a-fA-F]{3,8}\b|0x[0-9a-fA-F]{6,8}\b|\b(?:rgba?|hsla?|oklch|oklab)\(|\bColors?\.\w|\.(?:purple|indigo|pink|blue|red|green|orange|yellow|white|black|gray|grey)\b/;
 
 // The text that holds the colors of the gradient named at `start`, so a color
 // after it (the next CSS rule, a child element's style, the next statement)
@@ -275,11 +305,12 @@ function gradientScope(text, start, name) {
   // The assignment may sit on the line above: "const g =\n  ctx.create...".
   const assigned = /([A-Za-z_$][\w$]*)\s*=\s*(?:new\s+)?[\w$.]*$/.exec(text.slice(Math.max(0, start - 200), start));
   if (assigned) {
+    // Identifier characters only, so "$" is the one character to escape. The
+    // lookbehind is the identifier boundary: \b fails before "$g", and a
+    // preceding "." would make it another object's member (other.g).
     const variable = assigned[1].replace(/\$/g, "\\$");
-    const rest = text.slice(end);
-    const reassigned = rest.search(new RegExp(`(?:^|[^\\w$.])${variable}\\s*=(?!=)`));
-    const region = reassigned === -1 ? rest : rest.slice(0, reassigned);
-    for (const call of matches(new RegExp(`\\b${variable}\\.(?:addColorStop|setColors)\\s*\\(|\\b${variable}\\.colors\\s*=(?!=)`), region)) {
+    const region = bindingRegion(text.slice(end), variable);
+    for (const call of matches(new RegExp(`(?<![\\w$.])${variable}\\.(?:addColorStop|setColors)\\s*\\(|(?<![\\w$.])${variable}\\.colors\\s*=(?!=)`), region)) {
       const after = call.index + call[0].length;
       let tail;
       if (call[0].endsWith("(")) {
