@@ -157,6 +157,19 @@ test("transition-all flags `all` anywhere in a transition list", () => {
   assert.deepStrictEqual(scanSource(named, "a.css"), []);
 });
 
+test("transition-all stops at the quote that ends a CSS-in-JS value", () => {
+  // `all` in a later property of a style object is not part of the transition.
+  const pointerEvents = 'const s = { transition: "opacity .2s", pointerEvents: "all" };\n';
+  assert.deepStrictEqual(scanSource(pointerEvents, "a.tsx").map((f) => f.rule), []);
+  const userSelect = 'const t = { transition: "opacity .2s", userSelect: "all" };\n';
+  assert.deepStrictEqual(scanSource(userSelect, "a.tsx").map((f) => f.rule), []);
+  // `all` inside the quoted transition value still counts.
+  const quotedList = 'const u = { transition: "color .2s, all .3s" };\n';
+  assert.deepStrictEqual(scanSource(quotedList, "a.tsx").map((f) => f.rule), ["transition-all"]);
+  const singleQuoted = "const v = { transition: 'all .2s' };\n";
+  assert.deepStrictEqual(scanSource(singleQuoted, "a.tsx").map((f) => f.rule), ["transition-all"]);
+});
+
 test("slop-gradient reads Android #AARRGGBB colors", () => {
   const src = '<gradient android:startColor="#FF7C3AED" android:endColor="#FFEC4899"/>\n';
   assert.deepStrictEqual(scanSource(src, "bg.xml").map((f) => f.rule), ["slop-gradient"]);

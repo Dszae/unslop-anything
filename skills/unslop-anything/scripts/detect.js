@@ -632,7 +632,10 @@ const rules = [
       // `all` may sit anywhere in the list, not just first:
       // `transition: color .2s, all .3s` counts, but a property name that
       // merely starts with `all` (e.g. `all-in-one`) does not.
-      const first = matches(/\btransition-all\b|transition(?:-property)?:[^;{}]*?(?<![\w-])all(?![\w-])/, code).next();
+      // In a CSS-in-JS value the scan stops at the closing quote, so
+      // `pointerEvents: "all"` later in the same style object is not read
+      // as part of `transition: "opacity .2s"`.
+      const first = matches(/\btransition-all\b|transition(?:-property)?:\s*["'`]?[^;{}"'`]*?(?<![\w-])all(?![\w-])/, code).next();
       return first.done ? [] : [first.value.index];
     },
   },
