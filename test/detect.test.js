@@ -281,6 +281,20 @@ test("slop-gradient reads only the gradient's own colors (issue #67)", () => {
     ['<div className="bg-[linear-gradient(90deg,#7c3aed,#ec4899)]" />\n', "a.tsx"],
   ];
   for (const [src, file] of stops) assert.deepStrictEqual(gradientLines(src, file), [1], src);
+  // Stops that need the whole expression or the variable's whole lifetime.
+  const spread = [
+    // A ">" inside a JSX expression does not end the <Stop> tag.
+    ['<LinearGradient id="g">\n  <Stop offset={i > 0 ? "0" : "1"} stopColor="#7c3aed" />\n</LinearGradient>\n', "a.tsx", [1]],
+    // The assignment and the constructor on different lines.
+    ['const g =\n  ctx.createLinearGradient(0, 0, 1, 0);\ng.addColorStop(0, "#7c3aed");\n', "a.js", [2]],
+    // Another gradient built before this one's stops are added.
+    ['const a = ctx.createLinearGradient(0, 0, 1, 0);\nconst b = ctx.createLinearGradient(0, 0, 1, 0);\na.addColorStop(0, "#7c3aed");\nb.addColorStop(0, "#ffffff");\n', "a.js", [1]],
+    // A colors assignment that spans lines.
+    ["val d = GradientDrawable()\nd.colors = intArrayOf(\n  0xFF7C3AED.toInt()\n)\n", "a.kt", [1]],
+    // A reassigned variable: each gradient keeps only its own stops.
+    ['let g = ctx.createLinearGradient(0, 0, 1, 0);\ng.addColorStop(0, "#ffffff");\ng = ctx.createLinearGradient(0, 0, 1, 0);\ng.addColorStop(0, "#7c3aed");\n', "a.js", [3]],
+  ];
+  for (const [src, file, lines] of spread) assert.deepStrictEqual(gradientLines(src, file), lines, src);
 });
 
 test("0xRRGGBB colors are read alongside 0xFFRRGGBB", () => {

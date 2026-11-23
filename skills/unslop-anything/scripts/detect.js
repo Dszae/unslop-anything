@@ -251,7 +251,12 @@ function gradientScope(text, start, name) {
     if (text[end - 1] !== "/") {
       const close = text.indexOf(`</${name.replace(/^</, "")}`, end);
       const body = text.slice(end + 1, close === -1 ? text.length : close);
-      for (const stop of matches(/<stop\b[^>]*>/i, body)) scope += stop[0];
+      // tagEnd() skips "{...}", so a ">" in a JSX expression (offset={i > 0 ...})
+      // does not cut the tag before its stopColor.
+      for (const stop of matches(/<stop\b/i, body)) {
+        const stopEnd = tagEnd(body, stop.index);
+        scope += body.slice(stop.index, stopEnd === -1 ? body.length : stopEnd + 1);
+      }
     }
     return scope;
   }
@@ -263,18 +268,28 @@ function gradientScope(text, start, name) {
   if (COLOR_SIGN.test(scope.slice(name.length))) return scope;
   // A constructor that takes no colors (canvas createLinearGradient, Android
   // GradientDrawable()): they come in a Kotlin .apply { } block right after,
-  // or in calls on the variable it is assigned to, before the next gradient.
+  // or in calls on the variable it is assigned to, for as long as that
+  // variable holds it (until it is assigned again).
   const apply = /^\s*\.apply\s*\{/.exec(text.slice(end));
   if (apply) scope += text.slice(end, closeOf(text, end + apply[0].length - 1));
-  const lineStart = text.lastIndexOf("\n", start) + 1;
-  const assigned = /([A-Za-z_$][\w$]*)\s*=\s*(?:new\s+)?[\w$.]*$/.exec(text.slice(lineStart, start));
+  // The assignment may sit on the line above: "const g =\n  ctx.create...".
+  const assigned = /([A-Za-z_$][\w$]*)\s*=\s*(?:new\s+)?[\w$.]*$/.exec(text.slice(Math.max(0, start - 200), start));
   if (assigned) {
-    const rest = text.slice(end);
-    const next = rest.search(/(?:Linear|Radial)Gradient\b|GradientDrawable\b/);
-    const region = next === -1 ? rest : rest.slice(0, next);
     const variable = assigned[1].replace(/\$/g, "\\$");
-    for (const call of matches(new RegExp(`\\b${variable}\\.(?:addColorStop|setColors)\\s*\\(|\\b${variable}\\.colors\\s*=`), region)) {
-      const tail = call[0].endsWith("(") ? closeOf(region, call.index + call[0].length - 1) : region.indexOf("\n", call.index) >>> 0;
+    const rest = text.slice(end);
+    const reassigned = rest.search(new RegExp(`(?:^|[^\\w$.])${variable}\\s*=(?!=)`));
+    const region = reassigned === -1 ? rest : rest.slice(0, reassigned);
+    for (const call of matches(new RegExp(`\\b${variable}\\.(?:addColorStop|setColors)\\s*\\(|\\b${variable}\\.colors\\s*=(?!=)`), region)) {
+      const after = call.index + call[0].length;
+      let tail;
+      if (call[0].endsWith("(")) {
+        tail = closeOf(region, after - 1);
+      } else {
+        // `.colors = intArrayOf(...)` may span lines: read the value through
+        // its closing bracket, or to the end of the line for a plain value.
+        const at = after + /^\s*(?:new\s+)?[\w$.]*\s*/.exec(region.slice(after))[0].length;
+        tail = "([{".includes(region[at]) ? closeOf(region, at) : region.indexOf("\n", call.index) >>> 0;
+      }
       scope += region.slice(call.index, tail);
     }
   }
