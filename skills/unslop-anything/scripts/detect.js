@@ -234,6 +234,53 @@ function closeOf(text, open) {
   return text.length;
 }
 
+const COLOR_SIGN = /#[0-9a-fA-F]{3,8}\b|0x[0-9a-fA-F]{6,8}\b|\b(?:rgba?|hsla?|oklch|oklab)\(|\bColors?\.\w|\.(?:purple|indigo|pink|blue|red|green|orange|yellow|white|black|gray|grey)\b/;
+
+// The text that holds the colors of the gradient named at `start`, so a color
+// after it (the next CSS rule, a child element's style, the next statement)
+// is never read as one of its stops (issue #67). Empty when the name is not a
+// gradient definition, e.g. a type like GradientDrawable.Orientation.
+function gradientScope(text, start, name) {
+  // An element: <LinearGradient colors={...}>, <gradient android:startColor=.../>,
+  // or an SVG <linearGradient> whose colors sit on its <stop> children. Other
+  // children (an expo-linear-gradient's <Text>) are content, not stops.
+  if (name.startsWith("<") || text[start - 1] === "<") {
+    const end = tagEnd(text, start);
+    if (end === -1) return text.slice(start, text.indexOf("\n", start) >>> 0);
+    let scope = text.slice(start, end + 1);
+    if (text[end - 1] !== "/") {
+      const close = text.indexOf(`</${name.replace(/^</, "")}`, end);
+      const body = text.slice(end + 1, close === -1 ? text.length : close);
+      for (const stop of matches(/<stop\b[^>]*>/i, body)) scope += stop[0];
+    }
+    return scope;
+  }
+  // A call: linear-gradient(...), LinearGradient(colors: ...), Brush.linearGradient(...).
+  const paren = start + name.length + (text.slice(start + name.length).match(/^\s*/)?.[0].length ?? 0);
+  if (text[paren] !== "(") return "";
+  const end = closeOf(text, paren);
+  let scope = text.slice(start, end);
+  if (COLOR_SIGN.test(scope.slice(name.length))) return scope;
+  // A constructor that takes no colors (canvas createLinearGradient, Android
+  // GradientDrawable()): they come in a Kotlin .apply { } block right after,
+  // or in calls on the variable it is assigned to, before the next gradient.
+  const apply = /^\s*\.apply\s*\{/.exec(text.slice(end));
+  if (apply) scope += text.slice(end, closeOf(text, end + apply[0].length - 1));
+  const lineStart = text.lastIndexOf("\n", start) + 1;
+  const assigned = /([A-Za-z_$][\w$]*)\s*=\s*(?:new\s+)?[\w$.]*$/.exec(text.slice(lineStart, start));
+  if (assigned) {
+    const rest = text.slice(end);
+    const next = rest.search(/(?:Linear|Radial)Gradient\b|GradientDrawable\b/);
+    const region = next === -1 ? rest : rest.slice(0, next);
+    const variable = assigned[1].replace(/\$/g, "\\$");
+    for (const call of matches(new RegExp(`\\b${variable}\\.(?:addColorStop|setColors)\\s*\\(|\\b${variable}\\.colors\\s*=`), region)) {
+      const tail = call[0].endsWith("(") ? closeOf(region, call.index + call[0].length - 1) : region.indexOf("\n", call.index) >>> 0;
+      scope += region.slice(call.index, tail);
+    }
+  }
+  return scope;
+}
+
 // ---------- rules ----------
 // Each rule gets ctx { code, stack, file } and returns indexes into code.
 
@@ -251,8 +298,9 @@ const rules = [
       for (const m of matches(/(?<!<\/)(?:LinearGradient|linearGradient|RadialGradient|radialGradient|AngularGradient|Brush\.(?:linear|radial|horizontal|vertical|sweep)Gradient|linear-gradient|radial-gradient|GradientDrawable|<gradient\b)/, code)) {
         const lineStart = code.lastIndexOf("\n", m.index) + 1;
         if (/^\s*(?:import|export\s+\{|from)\b/.test(code.slice(lineStart, m.index))) continue;
-        const snippet = code.slice(m.index, m.index + 400);
-        if (hexColors(snippet, stack).some(isSlopHue) || SLOP_COLOR_NAME.test(snippet.slice(0, 250))) hits.push(m.index);
+        // Only the gradient's own stops count, not whatever follows it.
+        const stops = gradientScope(code, m.index, m[0]);
+        if (hexColors(stops, stack).some(isSlopHue) || SLOP_COLOR_NAME.test(stops)) hits.push(m.index);
       }
       // Tailwind: bg-gradient-to-r from-violet-600 to-fuchsia-500
       for (const m of matches(/["'`][^"'`\n]*\bbg-(?:gradient|linear|radial|conic)-[^"'`\n]*["'`]/, code)) {
